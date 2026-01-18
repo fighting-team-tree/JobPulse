@@ -21,9 +21,11 @@ from app.crawlers.router import router as crawlers_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan handler"""
-    # Startup: Create tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # Startup: Create tables (development only)
+    # In production, use: alembic upgrade head
+    if settings.DEBUG:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
     yield
     # Shutdown: Cleanup if needed
     await engine.dispose()

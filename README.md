@@ -24,53 +24,221 @@
 ## 🛠 기술 스택
 
 ### Frontend
-- **Next.js 14** - React 기반 풀스택 프레임워크
-- **TypeScript** - 타입 안정성
-- **Vanilla CSS** - 커스텀 디자인 시스템
+- **Next.js 16** - React 기반 풀스택 프레임워크
+- **React 19** - UI 라이브러리
+- **TypeScript 5** - 타입 안정성
+- **Tailwind CSS 4** - 유틸리티 CSS
+- **TanStack Query** - 서버 상태 관리
+- **Vitest** - 테스트 프레임워크
 
 ### Backend
 - **FastAPI** - Python 고성능 API 프레임워크
-- **PostgreSQL** - 관계형 데이터베이스
-- **SQLAlchemy** - ORM
+- **PostgreSQL 16** - 관계형 데이터베이스
+- **SQLAlchemy 2.0** - Async ORM
+- **Alembic** - 데이터베이스 마이그레이션
+- **Pytest** - 테스트 프레임워크
 
 ### AI/ML
 - **OpenAI API** - LLM 기반 분석
 - **LangChain** - RAG 파이프라인
 
+### Infra
+- **Docker Compose** - 컨테이너 오케스트레이션
+- **GitHub Actions** - CI/CD
+
 ## 📁 프로젝트 구조
 
 ```
-jobpulse/
+JobPulse/
 ├── apps/
-│   ├── web/                    # Next.js Frontend
-│   └── api/                    # FastAPI Backend
-├── packages/
-│   ├── shared/                 # 공유 타입/유틸
-│   └── ai-pipeline/            # AI 분석 파이프라인
+│   ├── api/                    # FastAPI Backend
+│   │   ├── app/
+│   │   │   ├── auth/          # 인증 (Google OAuth)
+│   │   │   ├── users/         # 사용자 관리
+│   │   │   ├── applications/  # 지원 현황
+│   │   │   ├── companies/     # 기업 정보
+│   │   │   ├── jobs/          # 채용 공고
+│   │   │   ├── resumes/       # 이력서 분석
+│   │   │   ├── crawlers/      # 채용 크롤러
+│   │   │   ├── core/          # 설정, 보안
+│   │   │   └── db/            # 데이터베이스
+│   │   ├── alembic/           # DB 마이그레이션
+│   │   ├── tests/             # 테스트
+│   │   └── requirements.txt
+│   │
+│   └── web/                    # Next.js Frontend
+│       ├── src/
+│       │   ├── app/           # 페이지 (App Router)
+│       │   ├── components/    # UI 컴포넌트
+│       │   ├── hooks/         # 커스텀 훅
+│       │   └── lib/           # API 클라이언트, 유틸
+│       ├── package.json
+│       └── vitest.config.ts
+│
+├── .github/workflows/          # CI/CD
 ├── docker-compose.yml
+├── .env.example
 └── README.md
 ```
 
 ## 🚀 시작하기
 
 ### 사전 요구사항
-- Node.js 18+
+- Node.js 20+
 - Python 3.11+
-- PostgreSQL 14+
+- PostgreSQL 16+
+- Docker & Docker Compose (선택)
 
-### 프론트엔드 실행
+---
+
+### 방법 1: 로컬 환경 세팅 (DB만 Docker)
+
+#### 1. 환경 변수 설정
+
+```bash
+# 루트 디렉토리에서
+cp .env.example .env
+# .env 파일을 열어서 실제 값으로 수정
+```
+
+#### 2. PostgreSQL 실행 (Docker)
+
+```bash
+# 루트 디렉토리에서 DB만 실행(터미널에 직접 로그가 띄워짐)
+docker-compose up db
+
+# 또는 백그라운드 실행
+docker-compose up -d db
+```
+
+> PostgreSQL을 로컬에 직접 설치한 경우 이 단계를 건너뛰세요.
+
+#### 3. 백엔드 가상환경 세팅 (Python)
+
+> 새 터미널을 열고 진행하세요.
+
+**Windows (PowerShell)**
+```powershell
+cd apps/api
+
+# 가상환경 생성
+python -m venv venv
+
+# 가상환경 활성화
+.\venv\Scripts\Activate.ps1
+
+# 의존성 설치
+pip install -r requirements.txt
+
+# 데이터베이스 마이그레이션
+alembic upgrade head
+
+# 서버 실행
+uvicorn app.main:app --reload
+```
+
+**Windows (CMD)**
+```cmd
+cd apps/api
+
+# 가상환경 생성
+python -m venv venv
+
+# 가상환경 활성화
+venv\Scripts\activate.bat
+
+# 의존성 설치
+pip install -r requirements.txt
+
+# 데이터베이스 마이그레이션
+alembic upgrade head
+
+# 서버 실행
+uvicorn app.main:app --reload
+```
+
+**macOS / Linux**
+```bash
+cd apps/api
+
+# 가상환경 생성
+python3 -m venv venv
+
+# 가상환경 활성화
+source venv/bin/activate
+
+# 의존성 설치
+pip install -r requirements.txt
+
+# 데이터베이스 마이그레이션
+alembic upgrade head
+
+# 서버 실행
+uvicorn app.main:app --reload
+```
+
+**가상환경 비활성화**
+```bash
+deactivate
+```
+
+#### 4. 프론트엔드 세팅 (Node.js)
+
+> 새 터미널을 열고 진행하세요.
+
 ```bash
 cd apps/web
+
+# 의존성 설치
 npm install
+
+# 개발 서버 실행
 npm run dev
 ```
 
-### 백엔드 실행
+#### 5. 테스트 실행
+
+**백엔드 테스트**
 ```bash
 cd apps/api
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+# 가상환경 활성화 후
+pytest
+pytest --cov=app  # 커버리지 포함
 ```
+
+**프론트엔드 테스트**
+```bash
+cd apps/web
+npm test
+npm run test:coverage  # 커버리지 포함
+```
+
+---
+
+### 방법 2: Docker Compose (권장)
+
+```bash
+# 루트 디렉토리에서
+cp .env.example .env
+# .env 파일 수정 후
+
+# 모든 서비스 실행
+docker-compose up
+
+# 백그라운드 실행
+docker-compose up -d
+
+# 로그 확인
+docker-compose logs -f
+
+# 서비스 중지
+docker-compose down
+```
+
+**서비스 URL**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/api/docs
 
 ## 📝 환경 변수
 

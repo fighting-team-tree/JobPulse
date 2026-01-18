@@ -1,13 +1,17 @@
 import type { NextConfig } from "next";
 
-// GitHub Pages 배포시 리포지토리 이름으로 변경
-// 로컬 개발시에는 빈 문자열 사용
+// Build mode: 'static' for GitHub Pages, 'standalone' for Docker
+const buildMode = process.env.BUILD_MODE || 'static';
+const isStatic = buildMode === 'static';
 const isProd = process.env.NODE_ENV === 'production';
-const basePath = isProd ? '/job_pluse' : '';
+
+// GitHub Pages 배포시 리포지토리 이름 사용
+const basePath = isStatic && isProd ? '/job_pluse' : '';
 
 const nextConfig: NextConfig = {
-  // GitHub Pages 정적 배포를 위한 설정
-  output: 'export',
+  // static: GitHub Pages 정적 배포
+  // standalone: Docker 컨테이너 배포
+  output: isStatic ? 'export' : 'standalone',
 
   // GitHub Pages는 /<repo-name>/ 경로 사용
   basePath: basePath,
@@ -15,11 +19,11 @@ const nextConfig: NextConfig = {
 
   // 정적 이미지 최적화 비활성화 (GitHub Pages에서 필요)
   images: {
-    unoptimized: true,
+    unoptimized: isStatic,
   },
 
   // 트레일링 슬래시 추가 (GitHub Pages 호환성)
-  trailingSlash: true,
+  trailingSlash: isStatic,
 };
 
 export default nextConfig;

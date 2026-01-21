@@ -21,7 +21,7 @@ class TestAuthEndpoints:
     @pytest.mark.asyncio
     async def test_protected_endpoint_without_token(self, client: AsyncClient):
         """Test that protected endpoints require authentication."""
-        response = await client.get("/api/users/me")
+        response = await client.get("/api/users/profile")
 
         # Should return 401 or 403 without token
         assert response.status_code in [401, 403]
